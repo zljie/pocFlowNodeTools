@@ -8,6 +8,7 @@ export interface LogicJudgeParam {
   variableType: string;  // 变量类型 (如: 参数对象)
   isCollection: number; // 是否集合 (0/1)
   attributeType: string; // 属性类型 (如: 供应商对象)
+  refType?: string; // 引用类型 (新增)
 }
 
 // 逻辑判断规则
@@ -32,6 +33,10 @@ export interface LogicJudgeAction {
   params: LogicJudgeParam[];
   rules: LogicJudgeRule[];
   branches: LogicJudgeBranch[];
+  // 新增字段匹配截图
+  loopType?: string; // 循环类型 (数组遍历)
+  loopBodyParams?: LogicJudgeParam[]; // 循环体参数
+  loopParams?: LogicJudgeParam[]; // 循环参数
 }
 
 // 逻辑判断节点完整结构

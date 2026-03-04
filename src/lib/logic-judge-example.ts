@@ -8,17 +8,18 @@ export const logicJudgeExample: LogicJudgeNode = {
   sn: 1,
   nodeName: "业务逻辑判断",
   action: {
+    loopType: "none", // 默认为无
     params: [
       {
-        code: "vendor2DTO",
+        code: "vendorIndex",
         name: "供应商对象",
         variableType: "参数对象",
         isCollection: 0,
         attributeType: "供应商对象"
       },
       {
-        code: "vendor2DTOList",
-        name: "供应商对象列表",
+        code: "vendor2DTO",
+        name: "供应商对象",
         variableType: "参数对象",
         isCollection: 1,
         attributeType: "供应商对象"
@@ -42,7 +43,7 @@ export const logicJudgeExample: LogicJudgeNode = {
       {
         branch: "if",
         scenarioName: "如果",
-        expression: ""
+        expression: "vendorIndex.getIsBlocked() == ture"
       },
       {
         branch: "else",
@@ -50,8 +51,34 @@ export const logicJudgeExample: LogicJudgeNode = {
         expression: ""
       }
     ],
-    branches: [
-      // 暂无数据示例
+    branches: [],
+    loopBodyParams: [
+      {
+        code: "caseDTOs",
+        name: "测试参数对象11",
+        refType: "参数对象",
+        variableType: "测试参数对象11",
+        isCollection: 1,
+        attributeType: "-"
+      }
+    ],
+    loopParams: [
+      {
+        code: "mytesttest2DTO",
+        name: "测试参数对象11",
+        refType: "参数对象",
+        variableType: "测试参数对象11",
+        isCollection: 0,
+        attributeType: "-"
+      },
+      {
+        code: "cslogicflowdto",
+        name: "测试服务编排",
+        refType: "参数对象",
+        variableType: "测试服务编排",
+        isCollection: 0,
+        attributeType: "-"
+      }
     ]
   }
 };

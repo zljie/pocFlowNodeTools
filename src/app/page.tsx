@@ -290,32 +290,6 @@ export default function Home() {
           )}
           */}
 
-          {/* Logic Judge List */}
-          {isLogicJudge && (
-            <div className="w-80 border-r border-gray-200 bg-white overflow-y-auto">
-              <div className="p-4">
-                <h3 className="font-medium text-gray-700 mb-3">节点列表</h3>
-                
-                <div className="space-y-2">
-                  <div className="p-3 rounded-lg border border-blue-500 bg-blue-50 cursor-pointer">
-                    <div className="font-medium text-sm text-blue-700">逻辑判断</div>
-                    <div className="text-xs text-blue-600 mt-1">处理复杂的业务逻辑分支判断</div>
-                  </div>
-
-                  <div className="p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
-                    <div className="font-medium text-sm">索引循环</div>
-                    <div className="text-xs text-gray-500 mt-1">基于索引的循环控制</div>
-                  </div>
-
-                  <div className="p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
-                    <div className="font-medium text-sm">数组遍历</div>
-                    <div className="text-xs text-gray-500 mt-1">遍历集合中的元素</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Node Detail */}
           <div className="flex-1 overflow-hidden bg-gray-50 flex flex-col">
             {/* Service Node Content */}
@@ -357,114 +331,241 @@ export default function Home() {
                           <label className="w-24 text-sm text-gray-500 text-right mr-4"><span className="text-red-500">*</span> 名称：</label>
                           <input type="text" value={logicJudgeExample.nodeName} className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                         </div>
+                        
+                        {/* 循环类型 */}
+                        <div className="flex items-center mt-4">
+                           <label className="w-24 text-sm text-gray-500 text-right mr-4"><span className="text-red-500">*</span> 循环类型：</label>
+                           <div className="flex items-center gap-6">
+                               <label className="flex items-center gap-2 cursor-pointer group">
+                                   <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${logicJudgeExample.action.loopType === 'none' ? 'border-blue-600' : 'border-gray-300'}`}>
+                                     {logicJudgeExample.action.loopType === 'none' && <div className="w-2 h-2 rounded-full bg-blue-600" />}
+                                   </div>
+                                   <span className="text-sm text-gray-700">无</span>
+                                   <input 
+                                     type="radio" 
+                                     className="hidden" 
+                                     checked={logicJudgeExample.action.loopType === 'none'} 
+                                     onChange={() => {
+                                        // 实际项目中应更新状态，这里直接修改对象用于演示切换效果
+                                        logicJudgeExample.action.loopType = 'none'; 
+                                        setSelectedNode({...selectedNode!}); // 触发重渲染
+                                     }} 
+                                   />
+                               </label>
+                               <label className="flex items-center gap-2 cursor-pointer group">
+                                   <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${logicJudgeExample.action.loopType === 'array' ? 'border-blue-600' : 'border-gray-300'}`}>
+                                     {logicJudgeExample.action.loopType === 'array' && <div className="w-2 h-2 rounded-full bg-blue-600" />}
+                                   </div>
+                                   <span className="text-sm text-gray-700">数组遍历</span>
+                                   <input 
+                                     type="radio" 
+                                     className="hidden" 
+                                     checked={logicJudgeExample.action.loopType === 'array'} 
+                                     onChange={() => {
+                                        logicJudgeExample.action.loopType = 'array'; 
+                                        setSelectedNode({...selectedNode!});
+                                     }} 
+                                   />
+                               </label>
+                           </div>
+                        </div>
                       </div>
                     </div>
 
-                    {/* 条件逻辑表达式参数 */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                      <div className="px-4 py-3 border-b border-gray-200 bg-white flex items-center gap-2">
-                        <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
-                        <span className="font-medium text-gray-800 text-sm">条件逻辑表达式参数</span>
-                      </div>
-                      <table className="w-full text-sm">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th className="px-4 py-3 text-left text-gray-500 font-medium">编码</th>
-                            <th className="px-4 py-3 text-left text-gray-500 font-medium">名称</th>
-                            <th className="px-4 py-3 text-left text-gray-500 font-medium">变量类型</th>
-                            <th className="px-4 py-3 text-left text-gray-500 font-medium">是否集合</th>
-                            <th className="px-4 py-3 text-left text-gray-500 font-medium">属性类型</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                          {logicJudgeExample.action.params.map((param, idx) => (
-                            <tr key={idx} className="hover:bg-gray-50">
-                              <td className="px-4 py-3 font-mono text-blue-600">{param.code}</td>
-                              <td className="px-4 py-3">{param.name}</td>
-                              <td className="px-4 py-3">{param.variableType}</td>
-                              <td className="px-4 py-3">
-                                <span className={`px-2 py-0.5 rounded text-xs ${param.isCollection ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>
-                                  {param.isCollection ? '是' : '否'}
-                                </span>
-                              </td>
-                              <td className="px-4 py-3 text-gray-500">{param.attributeType}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                    {logicJudgeExample.action.loopType === 'array' ? (
+                      <>
+                        {/* 循环体参数 */}
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                          <div className="px-4 py-3 border-b border-gray-200 bg-white flex items-center gap-2">
+                             <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
+                             <span className="font-medium text-gray-800 text-sm"><span className="text-red-500 mr-1">*</span>循环体参数：</span>
+                             <input type="text" value="caseDTOs" className="w-64 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500" />
+                          </div>
+                          
+                          <div className="px-4 py-3 border-b border-gray-200 bg-white">
+                              <button className="px-3 py-1.5 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors">添加循环体参数</button>
+                          </div>
 
-                    {/* 判断规则 */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                      <div className="px-4 py-3 border-b border-gray-200 bg-white flex items-center gap-2">
-                        <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
-                        <span className="font-medium text-gray-800 text-sm"><span className="text-red-500 mr-1">*</span>判断规则：</span>
-                      </div>
-                      <table className="w-full text-sm">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th className="px-4 py-3 text-left text-gray-500 font-medium w-24">条件分支</th>
-                            <th className="px-4 py-3 text-left text-gray-500 font-medium w-40">分支场景命名</th>
-                            <th className="px-4 py-3 text-left text-gray-500 font-medium">条件逻辑表达式</th>
-                            <th className="px-4 py-3 text-left text-gray-500 font-medium w-48">操作</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                          {logicJudgeExample.action.rules.map((rule, idx) => (
-                            <tr key={idx} className="hover:bg-gray-50">
-                              <td className="px-4 py-3 text-gray-700">{rule.branch}</td>
-                              <td className="px-4 py-3">
-                                <input type="text" value={rule.scenarioName} className="w-full px-2 py-1 border border-gray-200 rounded text-sm focus:border-blue-500 focus:outline-none" />
-                              </td>
-                              <td className="px-4 py-3">
-                                {rule.branch === 'if' && (
-                                  <input type="text" placeholder="请选择" className="w-full px-2 py-1 border border-blue-200 rounded text-sm text-blue-600 focus:border-blue-500 focus:outline-none bg-blue-50/30" />
-                                )}
-                              </td>
-                              <td className="px-4 py-3">
-                                <div className="flex gap-2">
-                                  <button className="px-2 py-1 text-xs border border-blue-200 text-blue-600 rounded hover:bg-blue-50">新增</button>
-                                  <button className="px-2 py-1 text-xs border border-blue-200 text-blue-600 rounded hover:bg-blue-50">新增局部变量</button>
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                          <table className="w-full text-sm">
+                            <thead className="bg-gray-50">
+                              <tr>
+                                <th className="px-4 py-3 text-left text-gray-500 font-medium">编码</th>
+                                <th className="px-4 py-3 text-left text-gray-500 font-medium">名称</th>
+                                <th className="px-4 py-3 text-left text-gray-500 font-medium">引用类型</th>
+                                <th className="px-4 py-3 text-left text-gray-500 font-medium">变量类型</th>
+                                <th className="px-4 py-3 text-left text-gray-500 font-medium">是否集合</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                              {logicJudgeExample.action.loopBodyParams?.map((param, idx) => (
+                                <tr key={idx} className="hover:bg-gray-50">
+                                  <td className="px-4 py-3 text-gray-700">{param.code}</td>
+                                  <td className="px-4 py-3 text-gray-700">{param.name}</td>
+                                  <td className="px-4 py-3 text-gray-700">{param.refType}</td>
+                                  <td className="px-4 py-3 text-gray-700">{param.variableType}</td>
+                                  <td className="px-4 py-3">
+                                    <span className={`px-2 py-0.5 rounded text-xs ${param.isCollection ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>
+                                      {param.isCollection ? '是' : '否'}
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
 
-                    {/* 条件逻辑分支 */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                      <div className="px-4 py-3 border-b border-gray-200 bg-white flex items-center gap-2">
-                        <span className="font-medium text-gray-800 text-sm text-gray-500 pl-4">条件逻辑分支：</span>
-                      </div>
-                      <table className="w-full text-sm">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th className="px-4 py-3 text-left text-gray-500 font-medium">归属条件分支</th>
-                            <th className="px-4 py-3 text-left text-gray-500 font-medium">分支场景命名</th>
-                            <th className="px-4 py-3 text-left text-gray-500 font-medium">编码</th>
-                            <th className="px-4 py-3 text-left text-gray-500 font-medium">名称</th>
-                            <th className="px-4 py-3 text-left text-gray-500 font-medium">数据类型</th>
-                            <th className="px-4 py-3 text-left text-gray-500 font-medium">是否集合</th>
-                            <th className="px-4 py-3 text-left text-gray-500 font-medium">操作</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                           {logicJudgeExample.action.branches.length === 0 ? (
-                             <tr>
-                               <td colSpan={7} className="px-4 py-8 text-center text-gray-400 text-xs">暂无数据</td>
-                             </tr>
-                           ) : (
-                             logicJudgeExample.action.branches.map((branch, idx) => (
-                               <tr key={idx}>
-                                 {/* ... branch data ... */}
-                               </tr>
-                             ))
-                           )}
-                        </tbody>
-                      </table>
-                    </div>
+                        {/* 循环参数 */}
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                          <div className="px-4 py-3 border-b border-gray-200 bg-white flex items-center gap-2">
+                            <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
+                            <span className="font-medium text-gray-800 text-sm"><span className="text-red-500 mr-1">*</span>循环参数：</span>
+                            <button className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors">添加</button>
+                          </div>
+                          <table className="w-full text-sm">
+                            <thead className="bg-gray-50">
+                              <tr>
+                                <th className="px-4 py-3 text-left text-gray-500 font-medium">编码</th>
+                                <th className="px-4 py-3 text-left text-gray-500 font-medium">名称</th>
+                                <th className="px-4 py-3 text-left text-gray-500 font-medium">引用类型</th>
+                                <th className="px-4 py-3 text-left text-gray-500 font-medium">变量类型</th>
+                                <th className="px-4 py-3 text-left text-gray-500 font-medium">是否集合</th>
+                                <th className="px-4 py-3 text-left text-gray-500 font-medium">操作</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                               {logicJudgeExample.action.loopParams?.map((param, idx) => (
+                                <tr key={idx} className="hover:bg-gray-50">
+                                  <td className="px-4 py-3">
+                                     <input type="text" value={param.code} className="w-full px-2 py-1 border border-gray-200 rounded text-sm text-gray-700" />
+                                  </td>
+                                  <td className="px-4 py-3">
+                                     <input type="text" value={param.name} className="w-full px-2 py-1 border border-gray-200 rounded text-sm text-gray-700" />
+                                  </td>
+                                  <td className="px-4 py-3 text-gray-700">{param.refType}</td>
+                                  <td className="px-4 py-3 text-gray-700">{param.variableType}</td>
+                                  <td className="px-4 py-3">
+                                    <span className={`px-2 py-0.5 rounded text-xs ${param.isCollection ? 'bg-gray-100 text-gray-600' : 'bg-gray-100 text-gray-600'}`}>
+                                      {param.isCollection ? '是' : '否'}
+                                    </span>
+                                  </td>
+                                  <td className="px-4 py-3">
+                                    <button className="text-red-500 hover:text-red-700 text-xs border border-red-200 px-2 py-1 rounded hover:bg-red-50">删除</button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        {/* 条件逻辑表达式参数 */}
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                          <div className="px-4 py-3 border-b border-gray-200 bg-white flex items-center gap-2">
+                            <span className="font-medium text-gray-800 text-sm pl-4">条件逻辑表达式参数：</span>
+                          </div>
+                          <table className="w-full text-sm">
+                            <thead className="bg-gray-50">
+                              <tr>
+                                <th className="px-4 py-3 text-left text-gray-500 font-medium">编码</th>
+                                <th className="px-4 py-3 text-left text-gray-500 font-medium">名称</th>
+                                <th className="px-4 py-3 text-left text-gray-500 font-medium">变量类型</th>
+                                <th className="px-4 py-3 text-left text-gray-500 font-medium">是否集合</th>
+                                <th className="px-4 py-3 text-left text-gray-500 font-medium">属性类型</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                              {logicJudgeExample.action.params.map((param, idx) => (
+                                <tr key={idx} className="hover:bg-gray-50">
+                                  <td className="px-4 py-3 text-gray-700">{param.code}</td>
+                                  <td className="px-4 py-3 text-gray-700">{param.name}</td>
+                                  <td className="px-4 py-3 text-gray-700">{param.variableType}</td>
+                                  <td className="px-4 py-3">
+                                    <span className={`px-2 py-0.5 rounded text-xs ${param.isCollection ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>
+                                      {param.isCollection ? '是' : '否'}
+                                    </span>
+                                  </td>
+                                  <td className="px-4 py-3 text-gray-500">{param.attributeType}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+
+                        {/* 判断规则 */}
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                          <div className="px-4 py-3 border-b border-gray-200 bg-white flex items-center gap-2">
+                            <span className="font-medium text-gray-800 text-sm pl-4"><span className="text-red-500 mr-1">*</span>判断规则：</span>
+                          </div>
+                          <table className="w-full text-sm">
+                            <thead className="bg-gray-50">
+                              <tr>
+                                <th className="px-4 py-3 text-left text-gray-500 font-medium w-24">条件分支</th>
+                                <th className="px-4 py-3 text-left text-gray-500 font-medium w-40">分支场景命名</th>
+                                <th className="px-4 py-3 text-left text-gray-500 font-medium">条件逻辑表达式</th>
+                                <th className="px-4 py-3 text-left text-gray-500 font-medium w-48">操作</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                              {logicJudgeExample.action.rules.map((rule, idx) => (
+                                <tr key={idx} className="hover:bg-gray-50">
+                                  <td className="px-4 py-3 text-gray-700">{rule.branch}</td>
+                                  <td className="px-4 py-3">
+                                    <input type="text" value={rule.scenarioName} className="w-full px-2 py-1 border border-gray-200 rounded text-sm focus:border-blue-500 focus:outline-none" />
+                                  </td>
+                                  <td className="px-4 py-3">
+                                    {rule.branch === 'if' ? (
+                                      <input type="text" value={rule.expression} className="w-full px-2 py-1 border border-gray-200 rounded text-sm focus:border-blue-500 focus:outline-none" />
+                                    ) : (
+                                      <div className="h-7"></div>
+                                    )}
+                                  </td>
+                                  <td className="px-4 py-3">
+                                    <div className="flex gap-2">
+                                      {rule.branch === 'if' && <button className="px-2 py-1 text-xs border border-blue-200 text-blue-600 rounded hover:bg-blue-50">新增</button>}
+                                      <button className="px-2 py-1 text-xs border border-blue-200 text-blue-600 rounded hover:bg-blue-50">新增局部变量</button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+
+                        {/* 条件逻辑分支 */}
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                          <div className="px-4 py-3 border-b border-gray-200 bg-white flex items-center gap-2">
+                            <span className="font-medium text-gray-800 text-sm text-gray-500 pl-4">条件逻辑分支：</span>
+                          </div>
+                          <table className="w-full text-sm">
+                            <thead className="bg-gray-50">
+                              <tr>
+                                <th className="px-4 py-3 text-left text-gray-500 font-medium">归属条件分支</th>
+                                <th className="px-4 py-3 text-left text-gray-500 font-medium">分支场景命名</th>
+                                <th className="px-4 py-3 text-left text-gray-500 font-medium">编码</th>
+                                <th className="px-4 py-3 text-left text-gray-500 font-medium">名称</th>
+                                <th className="px-4 py-3 text-left text-gray-500 font-medium">数据类型</th>
+                                <th className="px-4 py-3 text-left text-gray-500 font-medium">是否集合</th>
+                                <th className="px-4 py-3 text-left text-gray-500 font-medium">操作</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                               {logicJudgeExample.action.branches.length === 0 ? (
+                                 <tr>
+                                   <td colSpan={7} className="px-4 py-8 text-center text-gray-400 text-xs">暂无数据</td>
+                                 </tr>
+                               ) : (
+                                 logicJudgeExample.action.branches.map((branch, idx) => (
+                                   <tr key={idx}>
+                                     {/* ... branch data ... */}
+                                   </tr>
+                                 ))
+                               )}
+                            </tbody>
+                          </table>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
                 
