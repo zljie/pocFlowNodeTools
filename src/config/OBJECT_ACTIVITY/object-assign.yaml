@@ -1,0 +1,16 @@
+id: object-assign
+nodeType: object_assign
+category: OBJECT_ACTIVITY
+name: Object Assign
+nameCn: 对象赋值
+description: 修改或设置对象属性值
+jsonConfig:
+  nodeId: '1202'
+  nodeType: assign
+  sn: 2
+  nodeName: 计数自增
+  action:
+    assignList:
+      - receiveVariable: count
+        val: count + 1
+        valType: expression

@@ -1,0 +1,11 @@
+id: flow-continue
+nodeType: flow_continue
+category: FLOW_STATEMENT
+name: Continue
+nameCn: 继续
+description: 跳过当前循环，进入下一次迭代
+jsonConfig:
+  nodeId: '1202'
+  nodeType: continue
+  sn: 2
+  nodeName: 继续下一次循环

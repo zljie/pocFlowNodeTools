@@ -1,0 +1,5 @@
+field,fieldCn,type,required,description
+nodeId,节点ID,String,true,唯一标识
+nodeType,节点类型,String,true,固定值: return
+action.val,返回值,String,true,返回的变量或表达式
+action.returnType,返回类型,String,true,Java类型

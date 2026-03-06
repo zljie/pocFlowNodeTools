@@ -1,0 +1,19 @@
+id: loop-array
+nodeType: loop_array
+category: LOGIC_ACTIVITY
+name: Array Loop
+nameCn: 数组遍历
+description: 遍历集合或数组元素的循环，对每个元素执行逻辑
+jsonConfig:
+  nodeId: '1001'
+  nodeType: loop
+  sn: 1
+  nodeName: 遍历订单明细
+  action:
+    expr: items
+  localVariables:
+    - variableCode: item
+      variableName: 订单明细元素
+      variableType: SnItemDTO
+      referenceType: dto
+      loopVariableType: self

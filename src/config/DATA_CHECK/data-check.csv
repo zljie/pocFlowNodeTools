@@ -1,0 +1,5 @@
+field,fieldCn,type,required,description
+nodeId,节点ID,String,true,唯一标识
+nodeType,节点类型,String,true,固定值: check
+action.rules,校验规则,Array,true,规则集合
+action.failAction,失败动作,String,false,校验失败后动作

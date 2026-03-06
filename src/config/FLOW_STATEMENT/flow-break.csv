@@ -1,0 +1,3 @@
+field,fieldCn,type,required,description
+nodeId,节点ID,String,true,唯一标识
+nodeType,节点类型,String,true,固定值: break

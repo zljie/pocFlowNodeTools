@@ -1,0 +1,25 @@
+id: call-method
+nodeType: call_method
+category: CALL_ACTIVITY
+name: Method Call
+nameCn: 方法调用
+description: 执行系统内部定义的函数方法
+jsonConfig:
+  nodeId: '1201'
+  nodeType: method
+  sn: 1
+  nodeName: 调用收货方法
+  action:
+    ref:
+      methodId: F1
+      methodCode: processReceipt
+      autowiredName: receiptService
+    inputParameters:
+      - sn: 1
+        code: snItem
+        paramType: Object
+        refType: dto
+        valType: variable
+        val: item
+    outputParameter:
+      receiveVariable: receiptId

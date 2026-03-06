@@ -1,0 +1,6 @@
+field,fieldCn,type,required,description
+nodeId,节点ID,String,true,唯一标识
+nodeType,节点类型,String,true,固定值: if
+sn,排序号,Integer,true,同层级排序
+nodeName,节点名称,String,true,显示名称
+action.expr,条件表达式,String,true,Java表达式

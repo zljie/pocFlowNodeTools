@@ -1,0 +1,11 @@
+id: flow-break
+nodeType: flow_break
+category: FLOW_STATEMENT
+name: Break
+nameCn: 中断
+description: 强制跳出当前循环结构
+jsonConfig:
+  nodeId: '1203'
+  nodeType: break
+  sn: 3
+  nodeName: 中断循环

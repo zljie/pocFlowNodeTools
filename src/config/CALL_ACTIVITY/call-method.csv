@@ -1,0 +1,7 @@
+field,fieldCn,type,required,description
+nodeId,节点ID,String,true,唯一标识
+nodeType,节点类型,String,true,固定值: method
+action.ref.methodCode,方法编码,String,true,方法唯一标识
+action.ref.autowiredName,服务变量名,String,true,引用的服务变量
+action.inputParameters,输入参数,Array,false,方法入参
+action.outputParameter,输出参数,Object,false,方法返回值

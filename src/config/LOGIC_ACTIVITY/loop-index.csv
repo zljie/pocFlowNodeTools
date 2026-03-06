@@ -1,0 +1,5 @@
+field,fieldCn,type,required,description
+nodeId,节点ID,String,true,唯一标识
+nodeType,节点类型,String,true,固定值: loop
+action.expr,循环表达式,String,true,循环次数表达式
+localVariables,循环变量,Array,true,循环内的局部变量

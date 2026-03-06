@@ -1,0 +1,5 @@
+field,fieldCn,type,required,description
+globalOutputParameters,全局输出参数,Array,true,输出参数列表
+globalOutputParameters[].parameterCode,参数编码,String,true,参数唯一标识
+globalOutputParameters[].parameterType,参数类型,String,true,返回类型
+localVariables,局部变量,Array,false,流程内使用的变量

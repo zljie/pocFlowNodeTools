@@ -1,0 +1,20 @@
+id: object-mapping
+nodeType: object_mapping
+category: OBJECT_ACTIVITY
+name: Parameter Mapping
+nameCn: 参数映射
+description: 不同对象间的数据结构转换
+jsonConfig:
+  nodeId: '4001'
+  nodeType: mapping
+  sn: 1
+  nodeName: 订单DTO映射
+  action:
+    sourceObject: orderDTO
+    targetObject: saveDTO
+    fieldMappings:
+      - sourceField: orderNo
+        targetField: poNumber
+        transform: uppercase
+      - sourceField: amount
+        targetField: totalAmount

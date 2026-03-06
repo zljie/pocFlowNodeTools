@@ -1,0 +1,6 @@
+field,fieldCn,type,required,description
+nodeId,节点ID,String,true,唯一标识
+nodeType,节点类型,String,true,固定值: assign
+action.assignList,赋值列表,Array,true,赋值操作集合
+action.assignList[].receiveVariable,目标变量,String,true,接收赋值的变量
+action.assignList[].val,值,String,true,赋值表达式

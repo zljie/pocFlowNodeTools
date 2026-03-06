@@ -1,0 +1,6 @@
+field,fieldCn,type,required,description
+nodeId,节点ID,String,true,唯一标识
+nodeType,节点类型,String,true,固定值: service
+action.serviceUrl,服务地址,String,true,API接口地址
+action.serviceMethod,请求方法,String,true,GET/POST/PUT/DELETE
+action.body,请求体,Object,false,JSON请求参数

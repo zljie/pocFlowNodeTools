@@ -1,0 +1,17 @@
+id: logic-judge
+nodeType: logic_judge
+category: LOGIC_ACTIVITY
+name: Logic Judge
+nameCn: 逻辑判断
+description: 多分支条件判断节点，根据表达式结果执行不同分支
+jsonConfig:
+  nodeId: '1101'
+  nodeType: if
+  sn: 1
+  nodeName: 若状态为PAID且金额>0
+  action:
+    expr: Objects.equals(item.getStatus(), "PAID") && item.getAmount() != null && item.getAmount() > 0
+  nodes:
+    - nodeId: '1201'
+      nodeType: method
+      nodeName: 调用收货方法

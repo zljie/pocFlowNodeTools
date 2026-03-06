@@ -1,0 +1,4 @@
+field,fieldCn,type,required,description
+nodeId,节点ID,String,true,唯一标识
+nodeType,节点类型,String,true,固定值: rule
+action.ruleCode,规则编码,String,true,规则唯一标识

@@ -1,0 +1,20 @@
+id: call-service
+nodeType: call_service
+category: CALL_ACTIVITY
+name: Service Call
+nameCn: 服务调用
+description: 调用远程HTTP/RPC接口服务
+jsonConfig:
+  nodeId: '2002'
+  nodeType: service
+  sn: 2
+  nodeName: 调用检查服务
+  action:
+    serviceUrl: /api/order/check
+    serviceMethod: POST
+    headers:
+      Content-Type: application/json
+    body:
+      orderNo: ${orderNo}
+      amount: ${amount}
+    timeout: 30000

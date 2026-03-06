@@ -1,0 +1,18 @@
+id: call-rule
+nodeType: call_rule
+category: CALL_ACTIVITY
+name: Rule Call
+nameCn: 规则调用
+description: 引用并执行业务规则集
+jsonConfig:
+  nodeId: '3001'
+  nodeType: rule
+  sn: 1
+  nodeName: 调用价格计算规则
+  action:
+    ruleId: PRICE_CALC_RULE
+    ruleCode: calculatePrice
+    inputParams:
+      amount: ${amount}
+      quantity: ${quantity}
+    outputParam: calculatedPrice

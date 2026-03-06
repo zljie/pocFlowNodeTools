@@ -1,0 +1,4 @@
+field,fieldCn,type,required,description
+nodeId,节点ID,String,true,唯一标识
+action.expr,集合表达式,String,true,要遍历的集合
+localVariables,元素变量,Array,true,当前元素变量

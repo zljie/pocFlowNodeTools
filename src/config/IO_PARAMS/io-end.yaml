@@ -1,0 +1,27 @@
+id: io-end
+nodeType: io_end
+category: IO_PARAMS
+name: End Node
+nameCn: 结束节点
+description: 流程出口，定义输出参数
+jsonConfig:
+  globalOutputParameters:
+    - sn: 1
+      parameterId: '2002'
+      parameterCode: processedCount
+      parameterName: 处理计数
+      parameterType: Integer
+      referenceType: basic
+      referenceName: 整数
+      referenceId: '10'
+      isCollection: 0
+      isRequired: 0
+      defaultVal: 0
+  localVariables:
+    - sn: 2
+      variableCode: receiptId
+      variableName: 收货单ID
+      javaType: String
+      referenceType: dto
+      referenceName: 订单明细DTO
+      isCollection: 0

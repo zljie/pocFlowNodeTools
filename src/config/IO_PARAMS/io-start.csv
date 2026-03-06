@@ -1,0 +1,7 @@
+field,fieldCn,type,required,description
+flowCode,流程编码,String,true,流程唯一标识
+flowName,流程名称,String,true,显示名称
+globalInputParameters,全局输入参数,Array,true,输入参数列表
+globalInputParameters[].parameterCode,参数编码,String,true,参数唯一标识
+globalInputParameters[].parameterType,参数类型,String,true,String/Integer/Object
+globalInputParameters[].referenceType,引用类型,String,true,dto/basic/Object

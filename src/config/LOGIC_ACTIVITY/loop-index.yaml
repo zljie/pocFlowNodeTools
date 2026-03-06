@@ -1,0 +1,18 @@
+id: loop-index
+nodeType: loop_index
+category: LOGIC_ACTIVITY
+name: Index Loop
+nameCn: 索引循环
+description: 基于索引次数的循环结构，控制循环执行次数
+jsonConfig:
+  nodeId: '1001'
+  nodeType: loop
+  sn: 1
+  nodeName: 遍历订单明细
+  action:
+    expr: orderNumber
+  localVariables:
+    - variableCode: index
+      variableName: 索引
+      variableType: Integer
+      loopVariableType: self

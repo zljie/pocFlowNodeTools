@@ -1,0 +1,23 @@
+id: io-start
+nodeType: io_start
+category: IO_PARAMS
+name: Start Node
+nameCn: 开始节点
+description: 流程入口，定义输入参数
+jsonConfig:
+  flowCode: DemoForeachIfMethod_v2
+  flowName: 示例-遍历判断并调用方法
+  flowType: service
+  globalInputParameters:
+    - sn: 1
+      parameterId: '2001'
+      parameterCode: items
+      parameterName: 待处理集合
+      parameterType: Object
+      referenceType: dto
+      referenceName: 订单明细DTO
+      referenceId: '901'
+      referenceCode: snItemDTO
+      isCollection: 1
+      isPaging: 0
+      isRequired: 1

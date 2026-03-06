@@ -1,0 +1,6 @@
+field,fieldCn,type,required,description
+nodeId,节点ID,String,true,唯一标识
+nodeType,节点类型,String,true,固定值: mapping
+action.sourceObject,源对象,String,true,源数据对象
+action.targetObject,目标对象,String,true,目标数据对象
+action.fieldMappings,字段映射,Array,true,字段对应关系

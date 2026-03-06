@@ -1,0 +1,21 @@
+id: data-check
+nodeType: data_check
+category: DATA_CHECK
+name: Data Check
+nameCn: 数据检查
+description: 验证输入数据是否符合预设规则
+jsonConfig:
+  nodeId: '5001'
+  nodeType: check
+  sn: 1
+  nodeName: 校验订单金额
+  action:
+    rules:
+      - field: amount
+        validator: greaterThan
+        value: 0
+        message: 金额必须大于0
+      - field: orderNo
+        validator: notEmpty
+        message: 订单号不能为空
+    failAction: throwException

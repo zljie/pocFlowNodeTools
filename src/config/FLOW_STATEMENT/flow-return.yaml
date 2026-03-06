@@ -1,0 +1,15 @@
+id: flow-return
+nodeType: flow_return
+category: FLOW_STATEMENT
+name: Return
+nameCn: 返回
+description: 结束当前逻辑并返回结果
+jsonConfig:
+  nodeId: '9001'
+  nodeType: return
+  sn: 99
+  nodeName: 流程返回计数
+  action:
+    val: count
+    returnType: Integer
+    receiveVariable: processedCount
