@@ -1,18 +1,38 @@
-id: loop-index
-nodeType: loop_index
-category: LOGIC_ACTIVITY
-name: Index Loop
-nameCn: 索引循环
-description: 基于索引次数的循环结构，控制循环执行次数
-jsonConfig:
-  nodeId: '1001'
-  nodeType: loop
-  sn: 1
-  nodeName: 遍历订单明细
-  action:
-    expr: orderNumber
-  localVariables:
-    - variableCode: index
-      variableName: 索引
-      variableType: Integer
-      loopVariableType: self
+
+nodeId: "2001"
+order: 1
+nodeType: "loopi"
+sn: 1
+nodeName: "遍历1到10"
+action:
+  startValueExpr: "0" # int i 的起点
+  endConditionExpr: "i <= 10" # 循环的终止条件
+  stepValueExpr: "1" # 步进数值
+  directionType: "forward" # forward +=, backward -=
+  localVariables: # int i
+    - variableCode: "k"
+      variableName: "循环索引元素"
+      javaType: "Integer" # 固定只选整型
+      referenceType: "basic"
+      referenceName: "基础类型"
+      referenceId: "1"
+      loopVariableType: "self" # for i 索引变量
+      isCollection: 0
+      moduleCode: "mm"
+      groupCode: "basic"
+      version: "1"
+      projectCode: "demo"
+      tenantCode: "demo"
+    - variableCode: "asdfsf"
+      variableName: "循环索引元素"
+      javaType: "String" # 固定只选整型
+      referenceType: "basic"
+      referenceName: "基础类型"
+      referenceId: "1"
+      loopVariableType: "inner"
+      isCollection: 0
+      moduleCode: "mm"
+      groupCode: "basic"
+      version: "1"
+      projectCode: "demo"
+      tenantCode: "demo"

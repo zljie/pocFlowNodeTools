@@ -9,6 +9,7 @@ import {
   Save, Loader2
 } from "lucide-react";
 import { readCsv, writeCsv, readYaml, writeYaml } from "@/actions/file-ops";
+import * as yaml from 'js-yaml';
 import { NodeCategory, NodeExample, CATEGORY_COLORS, NodeType } from "@/types";
 import { nodeExamples, groupedNodeExamples } from "@/lib/node-examples";
 import { serviceNodeExample, excelFields } from "@/lib/service-node-example";
@@ -76,11 +77,12 @@ export default function Home() {
   
   // File Data States
   const [loopIndexCsvData, setLoopIndexCsvData] = useState<string[][]>([]);
-  const [localVariablesCsvData, setLocalVariablesCsvData] = useState<string[][]>([]); // New state for Local Variables
+  const [localVariablesCsvData, setLocalVariablesCsvData] = useState<string[][]>([]); 
+  const [canvasCsvData, setCanvasCsvData] = useState<string[][]>([]); // New state for Canvas
   const [loopIndexYamlContent, setLoopIndexYamlContent] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [activeSheet, setActiveSheet] = useState<"nodeConfig" | "localVariables">("nodeConfig"); // New state for Sheet switching
+  const [activeSheet, setActiveSheet] = useState<"nodeConfig" | "localVariables" | "canvas">("nodeConfig"); // New state for Sheet switching
 
   // Helper to convert index to Excel column name (0 -> A, 25 -> Z, 26 -> AA)
   const getExcelColumnName = (index: number) => {
@@ -112,11 +114,19 @@ export default function Home() {
       Promise.all([
         readCsv("/Users/johnson_mac/code/pocworkflow/flow-import-system/src/config/LOGIC_ACTIVITY/loop-index.csv"),
         readCsv("/Users/johnson_mac/code/pocworkflow/flow-import-system/src/config/LOGIC_ACTIVITY/loop-index-localVariables.csv"),
+        readCsv("/Users/johnson_mac/code/pocworkflow/flow-import-system/src/config/LOGIC_ACTIVITY/loop-index-canvas.csv"),
         readYaml("/Users/johnson_mac/code/pocworkflow/flow-import-system/src/config/LOGIC_ACTIVITY/loop-index.yaml")
-      ]).then(([csv, localVarsCsv, yaml]) => {
+      ]).then(([csv, localVarsCsv, canvasCsv, yamlContent]) => {
         setLoopIndexCsvData(csv);
         setLocalVariablesCsvData(localVarsCsv);
-        setLoopIndexYamlContent(yaml);
+        setCanvasCsvData(canvasCsv);
+        try {
+          const jsonObj = yaml.load(yamlContent);
+          setLoopIndexYamlContent(JSON.stringify(jsonObj, null, 2));
+        } catch (e) {
+          console.error("Error parsing YAML:", e);
+          setLoopIndexYamlContent(yamlContent); // Fallback to raw content if parsing fails
+        }
         setLoading(false);
       }).catch(err => {
         console.error("Failed to load files", err);
@@ -130,8 +140,10 @@ export default function Home() {
     try {
       if (activeSheet === "nodeConfig") {
         await writeCsv("/Users/johnson_mac/code/pocworkflow/flow-import-system/src/config/LOGIC_ACTIVITY/loop-index.csv", loopIndexCsvData);
-      } else {
+      } else if (activeSheet === "localVariables") {
         await writeCsv("/Users/johnson_mac/code/pocworkflow/flow-import-system/src/config/LOGIC_ACTIVITY/loop-index-localVariables.csv", localVariablesCsvData);
+      } else {
+        await writeCsv("/Users/johnson_mac/code/pocworkflow/flow-import-system/src/config/LOGIC_ACTIVITY/loop-index-canvas.csv", canvasCsvData);
       }
       // alert("CSV Saved!"); 
     } catch (err) {
@@ -145,7 +157,9 @@ export default function Home() {
   const handleSaveYaml = async () => {
     setSaving(true);
     try {
-      await writeYaml("/Users/johnson_mac/code/pocworkflow/flow-import-system/src/config/LOGIC_ACTIVITY/loop-index.yaml", loopIndexYamlContent);
+      const jsonObj = JSON.parse(loopIndexYamlContent);
+      const yamlStr = yaml.dump(jsonObj);
+      await writeYaml("/Users/johnson_mac/code/pocworkflow/flow-import-system/src/config/LOGIC_ACTIVITY/loop-index.yaml", yamlStr);
       // alert("YAML Saved!");
     } catch (err) {
       console.error(err);
@@ -1131,11 +1145,11 @@ export default function Home() {
                          <span>Loading configuration...</span>
                        </div>
                      ) : bottomTab === "json" ? (
-                       <div className="h-full flex flex-col">
-                         <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200">
-                           <span className="text-xs text-gray-500">YAML Source (Editable)</span>
-                           <button 
-                             onClick={handleSaveYaml} 
+                      <div className="h-full flex flex-col">
+                        <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200">
+                          <span className="text-xs text-gray-500">JSON View (Converted from YAML)</span>
+                          <button 
+                            onClick={handleSaveYaml} 
                              disabled={saving}
                              className="flex items-center gap-1 text-xs text-orange-600 hover:text-orange-700 disabled:opacity-50"
                            >
@@ -1155,19 +1169,25 @@ export default function Home() {
                          <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200">
                            <div className="flex items-center gap-4">
                              <div className="flex gap-2">
-                               <button 
-                                 onClick={() => setActiveSheet("nodeConfig")}
-                                 className={`px-3 py-1.5 text-xs rounded-md transition-colors ${activeSheet === "nodeConfig" ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-gray-100"}`}
-                               >
-                                 Node Config
-                               </button>
-                               <button 
-                                 onClick={() => setActiveSheet("localVariables")}
-                                 className={`px-3 py-1.5 text-xs rounded-md transition-colors ${activeSheet === "localVariables" ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-gray-100"}`}
-                               >
-                                 Local Variables
-                               </button>
-                             </div>
+                                <button 
+                                  onClick={() => setActiveSheet("nodeConfig")}
+                                  className={`px-3 py-1.5 text-xs rounded-md transition-colors ${activeSheet === "nodeConfig" ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-gray-100"}`}
+                                >
+                                  Node Config
+                                </button>
+                                <button 
+                                  onClick={() => setActiveSheet("localVariables")}
+                                  className={`px-3 py-1.5 text-xs rounded-md transition-colors ${activeSheet === "localVariables" ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-gray-100"}`}
+                                >
+                                  Local Variables
+                                </button>
+                                <button 
+                                  onClick={() => setActiveSheet("canvas")}
+                                  className={`px-3 py-1.5 text-xs rounded-md transition-colors ${activeSheet === "canvas" ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-gray-100"}`}
+                                >
+                                  Flow
+                                </button>
+                              </div>
                            </div>
                            <button 
                              onClick={handleSaveCsv} 
@@ -1180,53 +1200,60 @@ export default function Home() {
                          </div>
                          <div className="flex-1 overflow-auto bg-gray-100 p-4">
                            <div className="bg-white border border-gray-300 shadow-sm overflow-hidden">
-                             <table className="w-full text-sm border-collapse table-fixed">
-                               <thead>
-                                 <tr>
-                                   <th className="w-10 bg-gray-100 border-b border-r border-gray-300"></th>
-                                   {(activeSheet === "nodeConfig" ? loopIndexCsvData : localVariablesCsvData)[0]?.map((_, colIndex) => (
+                              <table className="w-full text-sm border-collapse table-fixed">
+                                <thead>
+                                  <tr>
+                                    <th className="w-10 bg-gray-100 border-b border-r border-gray-300"></th>
+                                    {(activeSheet === "nodeConfig" ? loopIndexCsvData : activeSheet === "localVariables" ? localVariablesCsvData : canvasCsvData)[0]?.map((_, colIndex) => (
                                       <th key={colIndex} className="bg-gray-100 border-b border-r border-gray-300 px-2 py-1 font-normal text-gray-600 text-center select-none w-32">
                                         {activeSheet === "nodeConfig" 
                                           ? getExcelColumnName(5 + colIndex) // 5 = F
-                                          : getExcelColumnName(24 + colIndex) // 24 = Y
+                                          : activeSheet === "localVariables"
+                                            ? getExcelColumnName(24 + colIndex) // 24 = Y
+                                            : getExcelColumnName(colIndex) // 0 = A
                                         }
                                       </th>
                                     ))}
-                                 </tr>
-                               </thead>
-                               <tbody>
-                                 {(activeSheet === "nodeConfig" ? loopIndexCsvData : localVariablesCsvData).map((row, rowIndex) => (
-                                   <tr key={rowIndex}>
-                                     <td className="bg-gray-100 border-b border-r border-gray-300 text-center text-gray-500 text-xs select-none">
-                                       {rowIndex + 1}
-                                     </td>
-                                     {row.map((cell, cellIndex) => (
-                                       <td key={cellIndex} className="border-b border-r border-gray-200 p-0">
-                                         <input 
-                                           type="text" 
-                                           value={cell} 
-                                           className={`w-full h-full px-2 py-1 outline-none border-none focus:ring-2 focus:ring-blue-500 focus:ring-inset focus:z-10 ${rowIndex === 0 ? 'font-bold bg-gray-50' : 'bg-white'}`}
-                                           onChange={(e) => {
-                                             if (activeSheet === "nodeConfig") {
-                                               const newData = [...loopIndexCsvData];
-                                               newData[rowIndex] = [...newData[rowIndex]];
-                                               newData[rowIndex][cellIndex] = e.target.value;
-                                               setLoopIndexCsvData(newData);
-                                             } else {
-                                               const newData = [...localVariablesCsvData];
-                                               newData[rowIndex] = [...newData[rowIndex]];
-                                               newData[rowIndex][cellIndex] = e.target.value;
-                                               setLocalVariablesCsvData(newData);
-                                             }
-                                           }}
-                                         />
-                                       </td>
-                                     ))}
-                                   </tr>
-                                 ))}
-                               </tbody>
-                             </table>
-                           </div>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {(activeSheet === "nodeConfig" ? loopIndexCsvData : activeSheet === "localVariables" ? localVariablesCsvData : canvasCsvData).map((row, rowIndex) => (
+                                    <tr key={rowIndex}>
+                                      <td className="bg-gray-100 border-b border-r border-gray-300 text-center text-gray-500 text-xs select-none">
+                                        {rowIndex + 1}
+                                      </td>
+                                      {row.map((cell, cellIndex) => (
+                                        <td key={cellIndex} className="border-b border-r border-gray-200 p-0">
+                                          <input 
+                                            type="text" 
+                                            value={cell} 
+                                            className={`w-full h-full px-2 py-1 outline-none border-none focus:ring-2 focus:ring-blue-500 focus:ring-inset focus:z-10 ${rowIndex === 0 ? 'font-bold bg-gray-50' : 'bg-white'}`}
+                                            onChange={(e) => {
+                                              if (activeSheet === "nodeConfig") {
+                                                const newData = [...loopIndexCsvData];
+                                                newData[rowIndex] = [...newData[rowIndex]];
+                                                newData[rowIndex][cellIndex] = e.target.value;
+                                                setLoopIndexCsvData(newData);
+                                              } else if (activeSheet === "localVariables") {
+                                                const newData = [...localVariablesCsvData];
+                                                newData[rowIndex] = [...newData[rowIndex]];
+                                                newData[rowIndex][cellIndex] = e.target.value;
+                                                setLocalVariablesCsvData(newData);
+                                              } else {
+                                                const newData = [...canvasCsvData];
+                                                newData[rowIndex] = [...newData[rowIndex]];
+                                                newData[rowIndex][cellIndex] = e.target.value;
+                                                setCanvasCsvData(newData);
+                                              }
+                                            }}
+                                          />
+                                        </td>
+                                      ))}
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
                          </div>
                        </div>
                      )}

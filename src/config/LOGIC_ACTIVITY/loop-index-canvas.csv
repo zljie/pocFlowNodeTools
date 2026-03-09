@@ -1,0 +1,2 @@
+服务编码,服务名称,服务api编码,服务api名称,数据类型（聚合层服务、服务设计）
+PurchaseRequisitionManagementAppService,采购申请管理应用服务,/open,打开采购申请,服务设计
