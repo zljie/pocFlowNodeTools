@@ -13,6 +13,7 @@ import { serviceNodeExample, excelFields } from "@/lib/service-node-example";
 import { serviceCallExample, serviceCallFormConfig, serviceCallExcelFields, SERVICE_CALL_EXCEL_REGIONS } from "@/lib/service-call-example";
 import { foreachNodeExample, foreachFormConfig, foreachExcelFields, FOREACH_EXCEL_REGIONS } from "@/lib/foreach-example";
 import { logicJudgeExample, logicJudgeExcelFields, LOGIC_JUDGE_EXCEL_REGIONS } from "@/lib/logic-judge-example";
+import { loopIndexExample, loopIndexExcelFields, LOOP_INDEX_EXCEL_REGIONS } from "@/lib/loop-index-example";
 
 const categoryInfo: Record<string, { name: string; icon: React.ReactNode; description: string }> = {
   [NodeCategory.LOGIC_ACTIVITY]: {
@@ -55,11 +56,6 @@ const categoryInfo: Record<string, { name: string; icon: React.ReactNode; descri
     icon: <Plug className="w-5 h-5" />,
     description: "调用外部服务接口",
   },
-  FOREACH: {
-    name: "循环遍历",
-    icon: <Box className="w-5 h-5" />,
-    description: "遍历集合执行循环逻辑",
-  },
 };
 
 type MainTab = string;
@@ -76,11 +72,16 @@ export default function Home() {
   // 新增：底部 Tab 状态
   const [bottomTab, setBottomTab] = useState<"json" | "excel">("json");
 
-  const categories = [...Object.values(NodeCategory).filter(c => c !== NodeCategory.SERVICE_NODE), "SERVICE_NODE", "FOREACH"];
+  const categories = [...Object.values(NodeCategory).filter(c => c !== NodeCategory.SERVICE_NODE), "SERVICE_NODE"];
   const isServiceNode = selectedCategory === "SERVICE_NODE";
   const isServiceCall = selectedNode?.nodeType === NodeType.CALL_SERVICE;
-  const isForeach = selectedCategory === "FOREACH";
+  
+  // 逻辑活动块下的子类型判断
+  const isLogicActivity = selectedCategory === NodeCategory.LOGIC_ACTIVITY;
   const isLogicJudge = selectedNode?.nodeType === NodeType.LOGIC_JUDGE;
+  const isForeach = selectedNode?.nodeType === "foreach" as NodeType;
+  const isLoopIndex = selectedNode?.nodeType === "loopi" as unknown as NodeType;
+  const currentCategoryNodes = groupedNodeExamples[selectedCategory] || [];
 
   // 侧边栏颜色映射
   const sidebarColors: Record<string, { bg: string; border: string; text: string; icon: string }> = {
@@ -91,7 +92,6 @@ export default function Home() {
     [NodeCategory.DATA_CHECK]: CATEGORY_COLORS[NodeCategory.DATA_CHECK],
     [NodeCategory.IO_PARAMS]: CATEGORY_COLORS[NodeCategory.IO_PARAMS],
     SERVICE_NODE: { bg: "bg-indigo-50", border: "border-indigo-200", text: "text-indigo-700", icon: "🔧" },
-    FOREACH: { bg: "bg-cyan-50", border: "border-cyan-200", text: "text-cyan-700", icon: "🔄" },
   };
 
   const handleCopyJson = () => {
@@ -183,38 +183,88 @@ export default function Home() {
 
         {/* Content Area */}
         <div className="flex-1 flex overflow-hidden">
-          {/* Node List - 原有节点类型 */}
-          {!isServiceNode && !isServiceCall && !isForeach && (
+          {/* Logic Activity List */}
+          {isLogicActivity && (
             <div className="w-80 border-r border-gray-200 bg-white overflow-y-auto">
-              {selectedCategory ? (
-                <div className="p-4">
-                  <h3 className="font-medium text-gray-700 mb-3">节点列表</h3>
-                  <div className="space-y-2">
-                    {groupedNodeExamples[selectedCategory]?.map((node) => {
-                      const colors = CATEGORY_COLORS[selectedCategory as NodeCategory];
-                      return (
-                        <button
-                          key={node.id}
-                          onClick={() => setSelectedNode(node)}
-                          className={`w-full text-left p-3 rounded-lg border transition-all ${
-                            selectedNode?.id === node.id
-                              ? "border-blue-500 bg-blue-50"
-                              : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                          }`}
-                        >
-                          <div className="font-medium text-sm">{node.nameCn}</div>
-                          <div className="text-xs text-gray-500 mt-1">{node.description}</div>
-                        </button>
-                      );
+              <div className="p-4">
+                <h3 className="font-medium text-gray-700 mb-3">节点列表</h3>
+                
+                <div className="space-y-2">
+                  <div 
+                    className={`p-3 rounded-lg border cursor-pointer ${isLogicJudge ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'}`}
+                    onClick={() => setSelectedNode({
+                      id: logicJudgeExample.nodeId,
+                      nodeType: NodeType.LOGIC_JUDGE,
+                      category: NodeCategory.LOGIC_ACTIVITY,
+                      name: "logic_judge",
+                      nameCn: "逻辑判断",
+                      description: "处理复杂的业务逻辑分支判断",
+                      jsonConfig: JSON.stringify(logicJudgeExample, null, 2),
+                      excelFields: logicJudgeExcelFields
                     })}
+                  >
+                    <div className={`font-medium text-sm ${isLogicJudge ? 'text-blue-700' : 'text-gray-900'}`}>逻辑判断</div>
+                    <div className={`text-xs mt-1 ${isLogicJudge ? 'text-blue-600' : 'text-gray-500'}`}>处理复杂的业务逻辑分支判断</div>
+                  </div>
+
+                  <div 
+                    className={`p-3 rounded-lg border cursor-pointer ${isLoopIndex ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:bg-gray-50'}`}
+                    onClick={() => setSelectedNode({
+                      id: loopIndexExample.nodeId,
+                      nodeType: "loopi" as unknown as NodeType, // loopi is not in NodeType enum yet or handled specially
+                      category: NodeCategory.LOGIC_ACTIVITY,
+                      name: "loopi",
+                      nameCn: "索引循环",
+                      description: "基于索引的循环控制",
+                      jsonConfig: JSON.stringify(loopIndexExample, null, 2),
+                      excelFields: loopIndexExcelFields
+                    })}
+                  >
+                    <div className={`font-medium text-sm ${isLoopIndex ? 'text-orange-700' : 'text-gray-900'}`}>索引循环</div>
+                    <div className={`text-xs mt-1 ${isLoopIndex ? 'text-orange-600' : 'text-gray-500'}`}>基于索引的循环控制</div>
+                  </div>
+
+                  <div 
+                    className={`p-3 rounded-lg border cursor-pointer ${isForeach ? 'border-cyan-500 bg-cyan-50' : 'border-gray-200 hover:bg-gray-50'}`}
+                    onClick={() => setSelectedNode({
+                      id: foreachNodeExample.nodeId,
+                      nodeType: "foreach" as NodeType, // foreach is not in NodeType enum yet or handled specially
+                      category: NodeCategory.LOGIC_ACTIVITY,
+                      name: "foreach",
+                      nameCn: "数组遍历",
+                      description: "遍历集合中的元素",
+                      jsonConfig: JSON.stringify(foreachNodeExample, null, 2),
+                      excelFields: foreachExcelFields
+                    })}
+                  >
+                    <div className={`font-medium text-sm ${isForeach ? 'text-cyan-700' : 'text-gray-900'}`}>数组遍历</div>
+                    <div className={`text-xs mt-1 ${isForeach ? 'text-cyan-600' : 'text-gray-500'}`}>遍历集合中的元素</div>
                   </div>
                 </div>
-              ) : (
-                <div className="p-8 text-center text-gray-400">
-                  <Box className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p>请选择左侧分类</p>
+              </div>
+            </div>
+          )}
+
+          {!isLogicActivity && !isServiceNode && (
+            <div className="w-80 border-r border-gray-200 bg-white overflow-y-auto">
+              <div className="p-4">
+                <h3 className="font-medium text-gray-700 mb-3">节点列表</h3>
+                <div className="space-y-2">
+                  {currentCategoryNodes.map((node) => {
+                    const isActive = selectedNode?.id === node.id;
+                    return (
+                      <div
+                        key={node.id}
+                        className={`p-3 rounded-lg border cursor-pointer ${isActive ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:bg-gray-50"}`}
+                        onClick={() => setSelectedNode(node)}
+                      >
+                        <div className={`font-medium text-sm ${isActive ? "text-blue-700" : "text-gray-900"}`}>{node.nameCn}</div>
+                        <div className={`text-xs mt-1 ${isActive ? "text-blue-600" : "text-gray-500"}`}>{node.description}</div>
+                      </div>
+                    );
+                  })}
                 </div>
-              )}
+              </div>
             </div>
           )}
 
@@ -226,37 +276,6 @@ export default function Home() {
                 <div className="p-3 rounded-lg border border-indigo-500 bg-indigo-50">
                   <div className="font-medium text-sm">打开采购申请</div>
                   <div className="text-xs text-gray-500 mt-1">PurchaseRequisitionManagementAppService</div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Foreach循环节点侧边栏 */}
-          {isForeach && (
-            <div className="w-80 border-r border-gray-200 bg-white overflow-y-auto">
-              <div className="p-4">
-                <h3 className="font-medium text-gray-700 mb-3">循环遍历</h3>
-                <div className="p-3 rounded-lg border border-cyan-500 bg-cyan-50">
-                  <div className="font-medium text-sm">遍历订单明细</div>
-                  <div className="text-xs text-gray-500 mt-1">循环遍历 items 集合</div>
-                </div>
-                
-                <div className="mt-6">
-                  <h4 className="font-medium text-gray-700 mb-3 text-sm">Excel列区域</h4>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 p-2 bg-blue-50 rounded border border-blue-200">
-                      <span className="px-2 py-0.5 bg-blue-500 text-white text-xs rounded">A-D</span>
-                      <span className="text-sm text-blue-700">基本信息</span>
-                    </div>
-                    <div className="flex items-center gap-2 p-2 bg-green-50 rounded border border-green-200">
-                      <span className="px-2 py-0.5 bg-green-500 text-white text-xs rounded">E</span>
-                      <span className="text-sm text-green-700">循环配置</span>
-                    </div>
-                    <div className="flex items-center gap-2 p-2 bg-purple-50 rounded border border-purple-200">
-                      <span className="px-2 py-0.5 bg-purple-500 text-white text-xs rounded">F-J</span>
-                      <span className="text-sm text-purple-700">循环参数</span>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -926,6 +945,160 @@ export default function Home() {
                    </div>
                 </div>
               </div>
+            ) : isLoopIndex ? (
+              <div className="flex flex-col h-full">
+                {/* 上半部分：表单配置 */}
+                <div className={`${isFormExpanded ? 'flex-1 min-h-0' : 'h-10 flex-none'} flex flex-col transition-all duration-300 ease-in-out`}>
+                   <div 
+                     className="flex items-center justify-between px-4 py-2 bg-gray-100 border-b border-gray-200 cursor-pointer hover:bg-gray-200 select-none"
+                     onClick={() => setIsFormExpanded(!isFormExpanded)}
+                   >
+                     <span className="font-medium text-gray-700 text-sm">表单配置</span>
+                     {isFormExpanded ? <ChevronDown className="w-4 h-4 text-gray-500" /> : <ChevronRightIcon className="w-4 h-4 text-gray-500" />}
+                   </div>
+                   <div className={`flex-1 overflow-y-auto p-6 space-y-6 ${isFormExpanded ? 'block' : 'hidden'}`}>
+                    {/* 基本信息 */}
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                      <div className="px-4 py-3 border-b border-gray-200 bg-blue-50">
+                        <span className="font-medium text-blue-700 text-sm">基本信息</span>
+                      </div>
+                      <div className="p-6">
+                        <div className="flex items-center">
+                          <label className="w-24 text-sm text-gray-500 text-right mr-4"><span className="text-red-500">*</span> 名称：</label>
+                          <input type="text" value={loopIndexExample.nodeName} className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500" />
+                        </div>
+                        
+                        {/* 循环配置 */}
+                        <div className="mt-6 space-y-4">
+                           <div className="flex items-center">
+                              <label className="w-24 text-sm text-gray-500 text-right mr-4"><span className="text-red-500">*</span> 循环起始值：</label>
+                              <input type="text" value={loopIndexExample.action.startValueExpr} className="w-32 px-3 py-2 border border-gray-300 rounded text-sm" />
+                           </div>
+                           <div className="flex items-center">
+                              <label className="w-24 text-sm text-gray-500 text-right mr-4"><span className="text-red-500">*</span> 循环结束条件：</label>
+                              <input type="text" value={loopIndexExample.action.endConditionExpr} className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm" />
+                           </div>
+                           <div className="flex items-center">
+                              <label className="w-24 text-sm text-gray-500 text-right mr-4"><span className="text-red-500">*</span> 循环方向：</label>
+                              <select className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm bg-white">
+                                <option value="forward">正向</option>
+                                <option value="backward">反向</option>
+                              </select>
+                           </div>
+                           <div className="flex items-center">
+                              <label className="w-24 text-sm text-gray-500 text-right mr-4"><span className="text-red-500">*</span> 循环步长：</label>
+                              <input type="text" value={loopIndexExample.action.stepValueExpr} className="w-32 px-3 py-2 border border-gray-300 rounded text-sm" />
+                           </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 循环参数 */}
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                      <div className="px-4 py-3 border-b border-gray-200 bg-white flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-1 h-4 bg-purple-600 rounded-full"></div>
+                          <span className="font-medium text-gray-800 text-sm"><span className="text-red-500 mr-1">*</span>循环参数：</span>
+                        </div>
+                        <button className="px-3 py-1.5 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors">添加</button>
+                      </div>
+                      <table className="w-full text-sm">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-4 py-3 text-left text-gray-500 font-medium">编码</th>
+                            <th className="px-4 py-3 text-left text-gray-500 font-medium">名称</th>
+                            <th className="px-4 py-3 text-left text-gray-500 font-medium">引用类型</th>
+                            <th className="px-4 py-3 text-left text-gray-500 font-medium">变量类型</th>
+                            <th className="px-4 py-3 text-left text-gray-500 font-medium">是否集合</th>
+                            <th className="px-4 py-3 text-left text-gray-500 font-medium">操作</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                           {loopIndexExample.localVariables.map((param, idx) => (
+                            <tr key={idx} className="hover:bg-gray-50">
+                              <td className="px-4 py-3">
+                                 <input type="text" value={param.variableCode} className="w-full px-2 py-1 border border-gray-200 rounded text-sm text-gray-700" />
+                              </td>
+                              <td className="px-4 py-3">
+                                 <input type="text" value={param.variableName} className="w-full px-2 py-1 border border-gray-200 rounded text-sm text-gray-700" />
+                              </td>
+                              <td className="px-4 py-3 text-gray-700">{param.referenceName}</td>
+                              <td className="px-4 py-3 text-gray-700">{param.javaType === "Integer" ? "整型" : param.javaType}</td>
+                              <td className="px-4 py-3">
+                                <span className={`px-2 py-0.5 rounded text-xs ${param.isCollection ? 'bg-gray-100 text-gray-600' : 'bg-gray-100 text-gray-600'}`}>
+                                  {param.isCollection ? '是' : '否'}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3">
+                                <button className="text-red-500 hover:text-red-700 text-xs border border-red-200 px-2 py-1 rounded hover:bg-red-50">删除</button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* 下半部分：数据结构预览 */}
+                <div className={`${isFormExpanded ? 'h-80' : 'flex-1 min-h-0'} border-t border-gray-200 bg-white flex flex-col transition-all duration-300 ease-in-out`}>
+                   <div className="flex border-b border-gray-200 px-4">
+                      <button onClick={() => setBottomTab("json")} className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${bottomTab === "json" ? "border-orange-600 text-orange-600" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
+                        Json数据结构
+                      </button>
+                      <button onClick={() => setBottomTab("excel")} className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${bottomTab === "excel" ? "border-orange-600 text-orange-600" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
+                        Excel数据结构
+                      </button>
+                   </div>
+                   
+                   <div className="flex-1 overflow-auto">
+                     {bottomTab === "json" ? (
+                       <pre className="p-4 text-sm bg-slate-900 text-slate-100">
+                         <code>{JSON.stringify(loopIndexExample, null, 2)}</code>
+                       </pre>
+                     ) : (
+                       <div className="h-full overflow-auto">
+                         <table className="w-full text-sm border-collapse">
+                           <thead className="bg-gray-50 sticky top-0 z-10 shadow-sm">
+                             <tr>
+                               <th className="px-4 py-3 text-left font-medium text-gray-500 w-20 border-b border-gray-200">Excel列</th>
+                               <th className="px-4 py-3 text-left font-medium text-gray-500 w-48 border-b border-gray-200">字段名称</th>
+                               <th className="px-4 py-3 text-left font-medium text-gray-500 border-b border-gray-200">数据示例</th>
+                             </tr>
+                           </thead>
+                           <tbody className="divide-y divide-gray-100 bg-white">
+                              {/* A-D Basic Info */}
+                              <tr className="bg-blue-50/30"><td colSpan={3} className="px-4 py-2 text-xs font-medium text-blue-700">基本信息 (A-D)</td></tr>
+                              <tr><td className="px-4 py-3 font-mono text-blue-600">A</td><td className="px-4 py-3 text-gray-700">序号</td><td className="px-4 py-3 font-mono text-gray-600">{loopIndexExample.sn}</td></tr>
+                              <tr><td className="px-4 py-3 font-mono text-blue-600">B</td><td className="px-4 py-3 text-gray-700">节点类型</td><td className="px-4 py-3 font-mono text-gray-600">{loopIndexExample.nodeType}</td></tr>
+                              <tr><td className="px-4 py-3 font-mono text-blue-600">C</td><td className="px-4 py-3 text-gray-700">节点名称</td><td className="px-4 py-3 text-gray-900">{loopIndexExample.nodeName}</td></tr>
+                              <tr><td className="px-4 py-3 font-mono text-blue-600">D</td><td className="px-4 py-3 text-gray-700">节点ID</td><td className="px-4 py-3 font-mono text-gray-600">{loopIndexExample.nodeId}</td></tr>
+
+                              {/* E-H Loop Config */}
+                              <tr className="bg-green-50/30"><td colSpan={3} className="px-4 py-2 text-xs font-medium text-green-700">循环配置 (E-H)</td></tr>
+                              <tr><td className="px-4 py-3 font-mono text-blue-600">E</td><td className="px-4 py-3 text-gray-700">循环起始值</td><td className="px-4 py-3 font-mono text-green-600">{loopIndexExample.action.startValueExpr}</td></tr>
+                              <tr><td className="px-4 py-3 font-mono text-blue-600">F</td><td className="px-4 py-3 text-gray-700">循环结束条件</td><td className="px-4 py-3 font-mono text-green-600">{loopIndexExample.action.endConditionExpr}</td></tr>
+                              <tr><td className="px-4 py-3 font-mono text-blue-600">G</td><td className="px-4 py-3 text-gray-700">循环方向</td><td className="px-4 py-3 font-mono text-green-600">{loopIndexExample.action.directionType}</td></tr>
+                              <tr><td className="px-4 py-3 font-mono text-blue-600">H</td><td className="px-4 py-3 text-gray-700">循环步长</td><td className="px-4 py-3 font-mono text-green-600">{loopIndexExample.action.stepValueExpr}</td></tr>
+
+                              {/* I Loop Params */}
+                              <tr className="bg-purple-50/30"><td colSpan={3} className="px-4 py-2 text-xs font-medium text-purple-700">循环参数 (I)</td></tr>
+                              <tr>
+                                <td className="px-4 py-3 font-mono text-blue-600 align-top">I</td>
+                                <td className="px-4 py-3 text-gray-700 align-top">循环参数 (JSON)</td>
+                                <td className="px-4 py-3">
+                                  <pre className="text-[10px] bg-gray-50 p-2 rounded border border-gray-100 overflow-x-auto text-gray-600 font-mono">
+                                    {JSON.stringify(loopIndexExample.localVariables, null, 2)}
+                                  </pre>
+                                </td>
+                              </tr>
+                           </tbody>
+                         </table>
+                       </div>
+                     )}
+                   </div>
+                </div>
+              </div>
             ) : isForeach ? (
               <div className="flex flex-col h-full">
                 {/* 上半部分：表单配置 */}
@@ -943,35 +1116,51 @@ export default function Home() {
                       <div className="px-4 py-3 border-b border-gray-200 bg-blue-50">
                         <span className="font-medium text-blue-700 text-sm">基本信息</span>
                       </div>
-                      <div className="p-6 grid grid-cols-2 gap-x-8 gap-y-6">
-                        <div className="flex items-center">
-                          <label className="w-24 text-sm text-gray-500 text-right mr-4">节点ID：</label>
-                          <input type="text" readOnly value={foreachNodeExample.nodeId} className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded text-gray-500 text-sm" />
+                      <div className="p-6">
+                        <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+                          <div className="flex items-center">
+                            <label className="w-24 text-sm text-gray-500 text-right mr-4">节点ID：</label>
+                            <input type="text" readOnly value={foreachNodeExample.nodeId} className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded text-gray-500 text-sm" />
+                          </div>
+                          <div className="flex items-center">
+                            <label className="w-24 text-sm text-gray-500 text-right mr-4">节点类型：</label>
+                            <input type="text" readOnly value={foreachNodeExample.nodeType} className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded text-gray-500 text-sm" />
+                          </div>
+                          <div className="flex items-center">
+                            <label className="w-24 text-sm text-gray-500 text-right mr-4"><span className="text-red-500">*</span> 序号：</label>
+                            <input type="number" value={foreachNodeExample.sn} className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500" />
+                          </div>
+                          <div className="flex items-center">
+                            <label className="w-24 text-sm text-gray-500 text-right mr-4"><span className="text-red-500">*</span> 节点名称：</label>
+                            <input type="text" value={foreachNodeExample.nodeName} className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500" />
+                          </div>
                         </div>
-                        <div className="flex items-center">
-                          <label className="w-24 text-sm text-gray-500 text-right mr-4">节点类型：</label>
-                          <input type="text" readOnly value={foreachNodeExample.nodeType} className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded text-gray-500 text-sm" />
-                        </div>
-                        <div className="flex items-center">
-                          <label className="w-24 text-sm text-gray-500 text-right mr-4"><span className="text-red-500">*</span> 序号：</label>
-                          <input type="number" value={foreachNodeExample.sn} className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500" />
-                        </div>
-                        <div className="flex items-center">
-                          <label className="w-24 text-sm text-gray-500 text-right mr-4"><span className="text-red-500">*</span> 节点名称：</label>
-                          <input type="text" value={foreachNodeExample.nodeName} className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500" />
+
+                        {/* 循环类型 (新增) */}
+                        <div className="flex items-center mt-6 border-t border-gray-100 pt-6">
+                           <label className="w-24 text-sm text-gray-500 text-right mr-4"><span className="text-red-500">*</span> 循环类型：</label>
+                           <div className="flex items-center gap-6">
+                               <label className="flex items-center gap-2 cursor-pointer group">
+                                   <div className="w-4 h-4 rounded-full border border-blue-600 flex items-center justify-center">
+                                     <div className="w-2 h-2 rounded-full bg-blue-600" />
+                                   </div>
+                                   <span className="text-sm text-gray-700">数组遍历</span>
+                               </label>
+                           </div>
                         </div>
                       </div>
                     </div>
 
                     {/* 循环配置 */}
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                      <div className="px-4 py-3 border-b border-gray-200 bg-green-50">
-                        <span className="font-medium text-green-700 text-sm">循环配置</span>
+                      <div className="px-4 py-3 border-b border-gray-200 bg-white flex items-center gap-2">
+                        <div className="w-1 h-4 bg-green-600 rounded-full"></div>
+                        <span className="font-medium text-gray-800 text-sm">循环配置</span>
                       </div>
                       <div className="p-6">
                         <div className="flex items-center">
                           <label className="w-32 text-sm text-gray-500 text-right mr-4"><span className="text-red-500">*</span> 目标集合表达式：</label>
-                          <input type="text" value={foreachNodeExample.action.expr} className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500" />
+                          <input type="text" value={foreachNodeExample.action.expr} className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500" />
                           <span className="ml-2 text-xs text-gray-400">输入要遍历的集合变量名</span>
                         </div>
                       </div>
@@ -979,8 +1168,9 @@ export default function Home() {
 
                     {/* 循环参数表格 */}
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                      <div className="px-4 py-3 border-b border-gray-200 bg-purple-50">
-                        <span className="font-medium text-purple-700 text-sm">循环参数</span>
+                      <div className="px-4 py-3 border-b border-gray-200 bg-white flex items-center gap-2">
+                        <div className="w-1 h-4 bg-purple-600 rounded-full"></div>
+                        <span className="font-medium text-gray-800 text-sm">循环参数</span>
                       </div>
                       <table className="w-full text-sm">
                         <thead className="bg-gray-50">
@@ -994,12 +1184,16 @@ export default function Home() {
                         </thead>
                         <tbody className="divide-y divide-gray-200">
                           {foreachNodeExample.action.loopParameter.map((param, idx) => (
-                            <tr key={idx}>
+                            <tr key={idx} className="hover:bg-gray-50">
                               <td className="px-4 py-3 font-mono text-blue-600">{param.parameterCode}</td>
                               <td className="px-4 py-3">{param.parameterName}</td>
                               <td className="px-4 py-3 font-mono text-purple-600">{param.parameterType}</td>
                               <td className="px-4 py-3">{param.loopValType}</td>
-                              <td className="px-4 py-3">{param.isCollection === 1 ? '是' : '否'}</td>
+                              <td className="px-4 py-3">
+                                <span className={`px-2 py-0.5 rounded text-xs ${param.isCollection === 1 ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>
+                                  {param.isCollection === 1 ? '是' : '否'}
+                                </span>
+                              </td>
                             </tr>
                           ))}
                         </tbody>
