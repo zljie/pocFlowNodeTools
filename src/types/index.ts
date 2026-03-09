@@ -368,6 +368,7 @@ export interface ForeachNode {
 }
 
 export * from "./logic-judge";
+export * from "./loop-index";
 
 export const CATEGORY_COLORS: Record<NodeCategory, { bg: string; border: string; text: string; icon: string }> = {
   [NodeCategory.LOGIC_ACTIVITY]: {

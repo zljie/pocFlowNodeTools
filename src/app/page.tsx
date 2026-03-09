@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Brain, Play, Plug, Box, Shield, LogIn, 
   ChevronRight, FileJson, FileSpreadsheet, 
   Download, Upload, Menu, X, Copy, Check,
-  Wrench, ChevronDown, ChevronRight as ChevronRightIcon
+  Wrench, ChevronDown, ChevronRight as ChevronRightIcon,
+  Save, Loader2
 } from "lucide-react";
+import { readCsv, writeCsv, readYaml, writeYaml } from "@/actions/file-ops";
 import { NodeCategory, NodeExample, CATEGORY_COLORS, NodeType } from "@/types";
 import { nodeExamples, groupedNodeExamples } from "@/lib/node-examples";
 import { serviceNodeExample, excelFields } from "@/lib/service-node-example";
@@ -71,6 +73,26 @@ export default function Home() {
   
   // 新增：底部 Tab 状态
   const [bottomTab, setBottomTab] = useState<"json" | "excel">("json");
+  
+  // File Data States
+  const [loopIndexCsvData, setLoopIndexCsvData] = useState<string[][]>([]);
+  const [localVariablesCsvData, setLocalVariablesCsvData] = useState<string[][]>([]); // New state for Local Variables
+  const [loopIndexYamlContent, setLoopIndexYamlContent] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [activeSheet, setActiveSheet] = useState<"nodeConfig" | "localVariables">("nodeConfig"); // New state for Sheet switching
+
+  // Helper to convert index to Excel column name (0 -> A, 25 -> Z, 26 -> AA)
+  const getExcelColumnName = (index: number) => {
+    let dividend = index + 1;
+    let columnName = "";
+    while (dividend > 0) {
+      const modulo = (dividend - 1) % 26;
+      columnName = String.fromCharCode(65 + modulo) + columnName;
+      dividend = Math.floor((dividend - 1) / 26);
+    }
+    return columnName;
+  };
 
   const categories = [...Object.values(NodeCategory).filter(c => c !== NodeCategory.SERVICE_NODE), "SERVICE_NODE"];
   const isServiceNode = selectedCategory === "SERVICE_NODE";
@@ -82,6 +104,57 @@ export default function Home() {
   const isForeach = selectedNode?.nodeType === "foreach" as NodeType;
   const isLoopIndex = selectedNode?.nodeType === "loopi" as unknown as NodeType;
   const currentCategoryNodes = groupedNodeExamples[selectedCategory] || [];
+
+  // Load data for Loop Index
+  useEffect(() => {
+    if (isLoopIndex) {
+      setLoading(true);
+      Promise.all([
+        readCsv("/Users/johnson_mac/code/pocworkflow/flow-import-system/src/config/LOGIC_ACTIVITY/loop-index.csv"),
+        readCsv("/Users/johnson_mac/code/pocworkflow/flow-import-system/src/config/LOGIC_ACTIVITY/loop-index-localVariables.csv"),
+        readYaml("/Users/johnson_mac/code/pocworkflow/flow-import-system/src/config/LOGIC_ACTIVITY/loop-index.yaml")
+      ]).then(([csv, localVarsCsv, yaml]) => {
+        setLoopIndexCsvData(csv);
+        setLocalVariablesCsvData(localVarsCsv);
+        setLoopIndexYamlContent(yaml);
+        setLoading(false);
+      }).catch(err => {
+        console.error("Failed to load files", err);
+        setLoading(false);
+      });
+    }
+  }, [isLoopIndex]);
+
+  const handleSaveCsv = async () => {
+    setSaving(true);
+    try {
+      if (activeSheet === "nodeConfig") {
+        await writeCsv("/Users/johnson_mac/code/pocworkflow/flow-import-system/src/config/LOGIC_ACTIVITY/loop-index.csv", loopIndexCsvData);
+      } else {
+        await writeCsv("/Users/johnson_mac/code/pocworkflow/flow-import-system/src/config/LOGIC_ACTIVITY/loop-index-localVariables.csv", localVariablesCsvData);
+      }
+      // alert("CSV Saved!"); 
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save CSV");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveYaml = async () => {
+    setSaving(true);
+    try {
+      await writeYaml("/Users/johnson_mac/code/pocworkflow/flow-import-system/src/config/LOGIC_ACTIVITY/loop-index.yaml", loopIndexYamlContent);
+      // alert("YAML Saved!");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save YAML");
+    } finally {
+      setSaving(false);
+    }
+  };
+
 
   // 侧边栏颜色映射
   const sidebarColors: Record<string, { bg: string; border: string; text: string; icon: string }> = {
@@ -1051,49 +1124,110 @@ export default function Home() {
                       </button>
                    </div>
                    
-                   <div className="flex-1 overflow-auto">
-                     {bottomTab === "json" ? (
-                       <pre className="p-4 text-sm bg-slate-900 text-slate-100">
-                         <code>{JSON.stringify(loopIndexExample, null, 2)}</code>
-                       </pre>
+                   <div className="flex-1 overflow-auto flex flex-col">
+                     {loading ? (
+                       <div className="h-full flex items-center justify-center text-gray-500 gap-2">
+                         <Loader2 className="w-5 h-5 animate-spin" />
+                         <span>Loading configuration...</span>
+                       </div>
+                     ) : bottomTab === "json" ? (
+                       <div className="h-full flex flex-col">
+                         <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200">
+                           <span className="text-xs text-gray-500">YAML Source (Editable)</span>
+                           <button 
+                             onClick={handleSaveYaml} 
+                             disabled={saving}
+                             className="flex items-center gap-1 text-xs text-orange-600 hover:text-orange-700 disabled:opacity-50"
+                           >
+                             {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                             {saving ? "Saving..." : "Save YAML"}
+                           </button>
+                         </div>
+                         <textarea 
+                           className="flex-1 p-4 text-sm font-mono bg-slate-900 text-slate-100 resize-none focus:outline-none"
+                           value={loopIndexYamlContent}
+                           onChange={(e) => setLoopIndexYamlContent(e.target.value)}
+                           spellCheck={false}
+                         />
+                       </div>
                      ) : (
-                       <div className="h-full overflow-auto">
-                         <table className="w-full text-sm border-collapse">
-                           <thead className="bg-gray-50 sticky top-0 z-10 shadow-sm">
-                             <tr>
-                               <th className="px-4 py-3 text-left font-medium text-gray-500 w-20 border-b border-gray-200">Excel列</th>
-                               <th className="px-4 py-3 text-left font-medium text-gray-500 w-48 border-b border-gray-200">字段名称</th>
-                               <th className="px-4 py-3 text-left font-medium text-gray-500 border-b border-gray-200">数据示例</th>
-                             </tr>
-                           </thead>
-                           <tbody className="divide-y divide-gray-100 bg-white">
-                              {/* A-D Basic Info */}
-                              <tr className="bg-blue-50/30"><td colSpan={3} className="px-4 py-2 text-xs font-medium text-blue-700">基本信息 (A-D)</td></tr>
-                              <tr><td className="px-4 py-3 font-mono text-blue-600">A</td><td className="px-4 py-3 text-gray-700">序号</td><td className="px-4 py-3 font-mono text-gray-600">{loopIndexExample.sn}</td></tr>
-                              <tr><td className="px-4 py-3 font-mono text-blue-600">B</td><td className="px-4 py-3 text-gray-700">节点类型</td><td className="px-4 py-3 font-mono text-gray-600">{loopIndexExample.nodeType}</td></tr>
-                              <tr><td className="px-4 py-3 font-mono text-blue-600">C</td><td className="px-4 py-3 text-gray-700">节点名称</td><td className="px-4 py-3 text-gray-900">{loopIndexExample.nodeName}</td></tr>
-                              <tr><td className="px-4 py-3 font-mono text-blue-600">D</td><td className="px-4 py-3 text-gray-700">节点ID</td><td className="px-4 py-3 font-mono text-gray-600">{loopIndexExample.nodeId}</td></tr>
-
-                              {/* E-H Loop Config */}
-                              <tr className="bg-green-50/30"><td colSpan={3} className="px-4 py-2 text-xs font-medium text-green-700">循环配置 (E-H)</td></tr>
-                              <tr><td className="px-4 py-3 font-mono text-blue-600">E</td><td className="px-4 py-3 text-gray-700">循环起始值</td><td className="px-4 py-3 font-mono text-green-600">{loopIndexExample.action.startValueExpr}</td></tr>
-                              <tr><td className="px-4 py-3 font-mono text-blue-600">F</td><td className="px-4 py-3 text-gray-700">循环结束条件</td><td className="px-4 py-3 font-mono text-green-600">{loopIndexExample.action.endConditionExpr}</td></tr>
-                              <tr><td className="px-4 py-3 font-mono text-blue-600">G</td><td className="px-4 py-3 text-gray-700">循环方向</td><td className="px-4 py-3 font-mono text-green-600">{loopIndexExample.action.directionType}</td></tr>
-                              <tr><td className="px-4 py-3 font-mono text-blue-600">H</td><td className="px-4 py-3 text-gray-700">循环步长</td><td className="px-4 py-3 font-mono text-green-600">{loopIndexExample.action.stepValueExpr}</td></tr>
-
-                              {/* I Loop Params */}
-                              <tr className="bg-purple-50/30"><td colSpan={3} className="px-4 py-2 text-xs font-medium text-purple-700">循环参数 (I)</td></tr>
-                              <tr>
-                                <td className="px-4 py-3 font-mono text-blue-600 align-top">I</td>
-                                <td className="px-4 py-3 text-gray-700 align-top">循环参数 (JSON)</td>
-                                <td className="px-4 py-3">
-                                  <pre className="text-[10px] bg-gray-50 p-2 rounded border border-gray-100 overflow-x-auto text-gray-600 font-mono">
-                                    {JSON.stringify(loopIndexExample.localVariables, null, 2)}
-                                  </pre>
-                                </td>
-                              </tr>
-                           </tbody>
-                         </table>
+                       <div className="h-full flex flex-col">
+                         <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200">
+                           <div className="flex items-center gap-4">
+                             <div className="flex gap-2">
+                               <button 
+                                 onClick={() => setActiveSheet("nodeConfig")}
+                                 className={`px-3 py-1.5 text-xs rounded-md transition-colors ${activeSheet === "nodeConfig" ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-gray-100"}`}
+                               >
+                                 Node Config
+                               </button>
+                               <button 
+                                 onClick={() => setActiveSheet("localVariables")}
+                                 className={`px-3 py-1.5 text-xs rounded-md transition-colors ${activeSheet === "localVariables" ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-gray-100"}`}
+                               >
+                                 Local Variables
+                               </button>
+                             </div>
+                           </div>
+                           <button 
+                             onClick={handleSaveCsv} 
+                             disabled={saving}
+                             className="flex items-center gap-1 text-xs text-green-600 hover:text-green-700 disabled:opacity-50"
+                           >
+                             {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                             {saving ? "Saving..." : "Save CSV"}
+                           </button>
+                         </div>
+                         <div className="flex-1 overflow-auto bg-gray-100 p-4">
+                           <div className="bg-white border border-gray-300 shadow-sm overflow-hidden">
+                             <table className="w-full text-sm border-collapse table-fixed">
+                               <thead>
+                                 <tr>
+                                   <th className="w-10 bg-gray-100 border-b border-r border-gray-300"></th>
+                                   {(activeSheet === "nodeConfig" ? loopIndexCsvData : localVariablesCsvData)[0]?.map((_, colIndex) => (
+                                      <th key={colIndex} className="bg-gray-100 border-b border-r border-gray-300 px-2 py-1 font-normal text-gray-600 text-center select-none w-32">
+                                        {activeSheet === "nodeConfig" 
+                                          ? getExcelColumnName(5 + colIndex) // 5 = F
+                                          : getExcelColumnName(24 + colIndex) // 24 = Y
+                                        }
+                                      </th>
+                                    ))}
+                                 </tr>
+                               </thead>
+                               <tbody>
+                                 {(activeSheet === "nodeConfig" ? loopIndexCsvData : localVariablesCsvData).map((row, rowIndex) => (
+                                   <tr key={rowIndex}>
+                                     <td className="bg-gray-100 border-b border-r border-gray-300 text-center text-gray-500 text-xs select-none">
+                                       {rowIndex + 1}
+                                     </td>
+                                     {row.map((cell, cellIndex) => (
+                                       <td key={cellIndex} className="border-b border-r border-gray-200 p-0">
+                                         <input 
+                                           type="text" 
+                                           value={cell} 
+                                           className={`w-full h-full px-2 py-1 outline-none border-none focus:ring-2 focus:ring-blue-500 focus:ring-inset focus:z-10 ${rowIndex === 0 ? 'font-bold bg-gray-50' : 'bg-white'}`}
+                                           onChange={(e) => {
+                                             if (activeSheet === "nodeConfig") {
+                                               const newData = [...loopIndexCsvData];
+                                               newData[rowIndex] = [...newData[rowIndex]];
+                                               newData[rowIndex][cellIndex] = e.target.value;
+                                               setLoopIndexCsvData(newData);
+                                             } else {
+                                               const newData = [...localVariablesCsvData];
+                                               newData[rowIndex] = [...newData[rowIndex]];
+                                               newData[rowIndex][cellIndex] = e.target.value;
+                                               setLocalVariablesCsvData(newData);
+                                             }
+                                           }}
+                                         />
+                                       </td>
+                                     ))}
+                                   </tr>
+                                 ))}
+                               </tbody>
+                             </table>
+                           </div>
+                         </div>
                        </div>
                      )}
                    </div>

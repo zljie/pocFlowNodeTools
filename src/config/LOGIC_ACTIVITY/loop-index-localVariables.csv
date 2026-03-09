@@ -1,0 +1,3 @@
+局部变量id,局部变量编码,局部变量名称,局部变量类型,引用局部变量类型,引用局部变量类型名称,引用局部变量编码,描述,是否集合,是否必需,默认值,模块编码,分组编码,上下文类型,链路id,循环变量类型(self/inner),排序号,数据类型（聚合层服务、服务设计）
+7195,k,循环变量,LOCAL_PARAMETER,basic,循环变量,Integer,,,,,,,,,self,0,SERVICE_LOGIC
+7196,newStr,新字符串,LOCAL_PARAMETER,basic,新字符串,String,,,,,,,,,inner,1,SERVICE_LOGIC

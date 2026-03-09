@@ -1,5 +1,3 @@
-field,fieldCn,type,required,description
-nodeId,节点ID,String,true,唯一标识
-nodeType,节点类型,String,true,固定值: loop
-action.expr,循环表达式,String,true,循环次数表达式
-localVariables,循环变量,Array,true,循环内的局部变量
+链路id,父级编码id,节点ID,顺序号(数字),节点类型,节点名称,表达式,方法id,方法/服务编码,服务api编码,模块编码,分组编码,方法调用入参,方法调用返回值编码,属性赋值类型,赋值变量编码,赋值变量数据值,方法返回值变量,数据类型（聚合层服务、服务设计）
+100,100,101,1,fori,索引循环,"{ ""expr"": { ""startValueExpr"": ""0"", ""endConditionExpr"": ""i <= 10"", ""stepValueExpr"": ""1"", ""directionType"": ""forward"" } }",,,,物料管理MM,采购管理,,,,,,,
+100,101,102,2,service,调用服务,"",,,,采购管理MM,采购管理,采购管理_采购订单创建,,,,,,
